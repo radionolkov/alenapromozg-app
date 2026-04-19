@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Мозг — Тест 2</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue: #2563EB;
+      --blue-light: #EFF6FF;
+      --blue-mid: #DBEAFE;
+      --green: #16A34A;
+      --green-light: #DCFCE7;
+      --red: #DC2626;
+      --red-light: #FEE2E2;
+      --text: #111827;
+      --muted: #6B7280;
+      --border: #E5E7EB;
+      --bg: #F9FAFB;
+      --white: #FFFFFF;
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px 32px;
+      min-height: 100vh;
+      animation: fadeIn 0.25s ease;
+    }
+    .screen.active { display: flex; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --- BADGE --- */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--blue-mid);
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 99px;
+      margin-bottom: 20px;
+    }
+    .badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--blue);
+      border-radius: 50%;
+    }
+
+    /* --- INTRO CARD --- */
+    .intro-card {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 380px;
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .intro-icon { font-size: 44px; margin-bottom: 14px; }
+    .intro-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      line-height: 1.2;
+    }
+    .intro-desc {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    .intro-desc b { color: var(--text); font-weight: 600; }
+
+    .rule-list {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .rule-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .rule-num {
+      flex-shrink: 0;
+      width: 22px; height: 22px;
+      background: var(--blue-light);
+      color: var(--blue);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* --- BUTTON --- */
+    .btn {
+      width: 100%;
+      max-width: 380px;
+      padding: 15px;
+      background: var(--blue);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.1s;
+      letter-spacing: 0.2px;
+    }
+    .btn:active { transform: scale(0.98); opacity: 0.9; }
+    .btn:disabled { background: #93C5FD; cursor: default; }
+
+    /* --- TIMER BAR --- */
+    .timer-header {
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .timer-label { font-size: 13px; color: var(--muted); font-weight: 500; }
+    .timer-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--blue);
+      transition: color 0.3s;
+      min-width: 48px;
+      text-align: right;
+    }
+    .timer-value.warn { color: var(--red); }
+
+    .timer-bar-wrap {
+      width: 100%;
+      max-width: 380px;
+      height: 6px;
+      background: var(--border);
+      border-radius: 99px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .timer-bar-fill {
+      height: 100%;
+      background: var(--blue);
+      border-radius: 99px;
+      transition: width 1s linear, background 0.3s;
+    }
+    .timer-bar-fill.warn { background: var(--red); }
+
+    /* --- SCHULTE --- */
+    .schulte-hint {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .schulte-hint span {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--blue);
+    }
+
+    .schulte-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+      width: 100%;
+      max-width: 360px;
+    }
+    .s-cell {
+      aspect-ratio: 1;
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 19px;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+      color: var(--text);
+    }
+    .s-cell:active { transform: scale(0.92); }
+    .s-cell.found {
+      /* found cells look identical to normal cells */
+      background: var(--white);
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .s-cell.wrong {
+      background: var(--red-light);
+      border-color: #FCA5A5;
+      animation: shake 0.3s ease;
+    }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25%      { transform: translateX(-5px); }
+      75%      { transform: translateX(5px); }
+    }
+
+    /* --- WORDS --- */
+    .words-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 7px;
+      width: 100%;
+      max-width: 380px;
+      margin-bottom: 8px;
+    }
+    .w-cell {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      padding: 10px 5px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    /* --- INPUT --- */
+    .input-label {
+      width: 100%;
+      max-width: 380px;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .words-textarea {
+      width: 100%;
+      max-width: 380px;
+      min-height: 96px;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-family: inherit;
+      resize: vertical;
+      outline: none;
+      background: var(--white);
+      color: var(--text);
+      transition: border-color 0.2s;
+      margin-bottom: 14px;
+    }
+    .words-textarea:focus { border-color: var(--blue); }
+
+    /* --- STATE SCREENS --- */
+    .state-icon { font-size: 60px; margin: 32px 0 20px; }
+    .state-title { font-size: 22px; font-weight: 700; margin-bottom: 10px; text-align: center; }
+    .state-desc { font-size: 14px; color: var(--muted); text-align: center; line-height: 1.6; max-width: 300px; }
+
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 32px auto 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .spacer { flex: 1; }
+  </style>
+</head>
+<body>
+
+<!-- S1: Intro Schulte -->
+<div class="screen active" id="s-schulte-intro">
+  <div style="height:12px"></div>
+  <div class="badge">Задание 1 из 2</div>
+  <div class="intro-card">
+    <div class="intro-icon">🔢</div>
+    <div class="intro-title">Таблица Шульте</div>
+    <div class="intro-desc">Таблица с числами от 1 до 25. Ваша задача — находить и нажимать числа строго по порядку.</div>
+    <div class="rule-list">
+      <div class="rule-item"><div class="rule-num">1</div><div>Ищите число 1, нажмите на него, затем 2, затем 3...</div></div>
+      <div class="rule-item"><div class="rule-num">2</div><div>Взгляд можно свободно перемещать по таблице</div></div>
+      <div class="rule-item"><div class="rule-num">3</div><div>У вас <b>40 секунд</b> — нажмите Старт когда готовы</div></div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn" onclick="startSchulte()">Старт</button>
+</div>
+
+<!-- S2: Schulte table -->
+<div class="screen" id="s-schulte">
+  <div class="timer-header">
+    <div class="timer-label">Осталось</div>
+    <div class="timer-value" id="schulte-time">40</div>
+  </div>
+  <div class="timer-bar-wrap">
+    <div class="timer-bar-fill" id="schulte-bar" style="width:100%"></div>
+  </div>
+  <div class="schulte-hint">Следующее: <span id="schulte-next">1</span></div>
+  <div class="schulte-grid" id="schulte-grid"></div>
+</div>
+
+<!-- S3: Intro Words -->
+<div class="screen" id="s-words-intro">
+  <div style="height:12px"></div>
+  <div class="badge">Задание 2 из 2</div>
+  <div class="intro-card">
+    <div class="intro-icon">📝</div>
+    <div class="intro-title">Запоминание слов</div>
+    <div class="intro-desc">Перед вами появится таблица из 20 слов. Запомните как можно больше за одну минуту.</div>
+    <div class="rule-list">
+      <div class="rule-item"><div class="rule-num">1</div><div>Таблица показывается ровно <b>1 минуту</b> — закончить раньше нельзя</div></div>
+      <div class="rule-item"><div class="rule-num">2</div><div>Записывать слова нельзя</div></div>
+      <div class="rule-item"><div class="rule-num">3</div><div>После — введёте все слова, которые запомнили</div></div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn" onclick="startWords()">Старт</button>
+</div>
+
+<!-- S4: Words table -->
+<div class="screen" id="s-words">
+  <div class="timer-header">
+    <div class="timer-label">Запоминайте</div>
+    <div class="timer-value" id="words-time">60</div>
+  </div>
+  <div class="timer-bar-wrap">
+    <div class="timer-bar-fill" id="words-bar" style="width:100%"></div>
+  </div>
+  <div class="words-grid" id="words-grid"></div>
+</div>
+
+<!-- S5: Words input -->
+<div class="screen" id="s-words-input">
+  <div style="height:16px"></div>
+  <div class="badge">Почти готово</div>
+  <div class="intro-card" style="margin-bottom:16px">
+    <div class="intro-icon" style="font-size:36px">💬</div>
+    <div class="intro-title">Какие слова запомнили?</div>
+    <div class="intro-desc">Введите все слова через запятую или каждое с новой строки. Учитываются только точные совпадения.</div>
+  </div>
+  <div class="input-label">Ваши слова:</div>
+  <textarea class="words-textarea" id="words-answer" placeholder="столб, ручка, цветок..."></textarea>
+  <button class="btn" onclick="submitWords()">Готово</button>
+</div>
+
+<!-- S6: Loading -->
+<div class="screen" id="s-loading">
+  <div class="spacer"></div>
+  <div class="spinner"></div>
+  <div class="state-title">Обрабатываем результат...</div>
+  <div class="spacer"></div>
+</div>
+
+<!-- S7: Done -->
+<div class="screen" id="s-done">
+  <div class="spacer"></div>
+  <div class="state-icon">✅</div>
+  <div class="state-title">Тест завершён!</div>
+  <div class="state-desc" style="margin-bottom:28px">Результаты сохранены. Нажмите кнопку ниже, чтобы получить когнитивный профиль прямо в боте.</div>
+  <button class="btn" onclick="triggerResult()" id="get-result-btn">📊 Получить результаты доп. теста</button>
+  <div class="spacer"></div>
+</div>
+
+<!-- S8: Error -->
+<div class="screen" id="s-error">
+  <div class="spacer"></div>
+  <div class="state-icon">❌</div>
+  <div class="state-title">Что-то пошло не так</div>
+  <div class="state-desc" id="error-msg">Не удалось отправить результат. Вернитесь в бот и попробуйте ещё раз.</div>
+  <div class="spacer"></div>
+</div>
+
+<script>
+// ===================== CONFIG =====================
+const WEBHOOK_URL = 'https://work.radionolkov.ru/webhook/mozg-test2';
+
+const WORDS = [
+  'Столб','Ручка','Цветок','Ваза',
+  'Книга','Бабочка','Бабушка','Серьга',
+  'Медведь','Квартира','Стакан','Хлопок',
+  'Лампа','Отдых','Трава','Выдра',
+  'Квадрат','Свеча','Пирамида','Луна'
+];
+
+// ===================== STATE =====================
+let userId = null;
+let schulteScore = null;
+let schulteTimer = null;
+let wordsTimer = null;
+let schulteStart = null;
+let nextExpected = 1;
+
+// ===================== INIT =====================
+window.addEventListener('DOMContentLoaded', () => {
+  const tg = window.Telegram?.WebApp;
+  if (tg) {
+    tg.ready();
+    tg.expand();
+    userId = String(tg.initDataUnsafe?.user?.id || '');
+  }
+  if (!userId) {
+    userId = new URLSearchParams(window.location.search).get('user_id') || '';
+  }
+  if (!userId) {
+    showError('Не удалось определить пользователя. Откройте приложение через бот.');
+  }
+});
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showError(msg) {
+  if (msg) document.getElementById('error-msg').textContent = msg;
+  show('s-error');
+}
+
+// ===================== SCHULTE =====================
+function startSchulte() {
+  const nums = shuffle(Array.from({length: 25}, (_, i) => i + 1));
+  const grid = document.getElementById('schulte-grid');
+  grid.innerHTML = '';
+  nums.forEach(n => {
+    const cell = document.createElement('div');
+    cell.className = 's-cell';
+    cell.textContent = n;
+    cell.dataset.n = n;
+    cell.addEventListener('click', () => onSchulteClick(cell, n));
+    grid.appendChild(cell);
+  });
+
+  nextExpected = 1;
+  document.getElementById('schulte-next').textContent = '1';
+  show('s-schulte');
+
+  schulteStart = Date.now();
+  let left = 40;
+  updateSchulteTimer(left, 40);
+
+  schulteTimer = setInterval(() => {
+    left--;
+    updateSchulteTimer(left, 40);
+    if (left <= 0) {
+      clearInterval(schulteTimer);
+      schulteScore = 'bad';
+      show('s-words-intro');
+    }
+  }, 1000);
+}
+
+function updateSchulteTimer(left, total) {
+  const el = document.getElementById('schulte-time');
+  const bar = document.getElementById('schulte-bar');
+  el.textContent = left;
+  bar.style.width = (left / total * 100) + '%';
+  const warn = left <= 10;
+  el.classList.toggle('warn', warn);
+  bar.classList.toggle('warn', warn);
+}
+
+function onSchulteClick(cell, num) {
+  if (num < nextExpected) return; // already clicked
+  if (num !== nextExpected) {
+    cell.classList.add('wrong');
+    setTimeout(() => cell.classList.remove('wrong'), 300);
+    return;
+  }
+  // mark as clicked but keep visually identical
+  cell.style.pointerEvents = 'none';
+  nextExpected++;
+  if (nextExpected > 25) {
+    clearInterval(schulteTimer);
+    const elapsed = (Date.now() - schulteStart) / 1000;
+    schulteScore = elapsed < 20 ? 'good' : elapsed <= 30 ? 'normal' : 'bad';
+    document.getElementById('schulte-next').textContent = '✓';
+    setTimeout(() => show('s-words-intro'), 500);
+  } else {
+    document.getElementById('schulte-next').textContent = nextExpected;
+  }
+}
+
+// ===================== WORDS =====================
+function startWords() {
+  const grid = document.getElementById('words-grid');
+  grid.innerHTML = '';
+  WORDS.forEach(w => {
+    const cell = document.createElement('div');
+    cell.className = 'w-cell';
+    cell.textContent = w;
+    grid.appendChild(cell);
+  });
+
+  show('s-words');
+  let left = 60;
+  updateWordsTimer(left, 60);
+
+  wordsTimer = setInterval(() => {
+    left--;
+    updateWordsTimer(left, 60);
+    if (left <= 0) {
+      clearInterval(wordsTimer);
+      show('s-words-input');
+    }
+  }, 1000);
+}
+
+function updateWordsTimer(left, total) {
+  const el = document.getElementById('words-time');
+  const bar = document.getElementById('words-bar');
+  el.textContent = left;
+  bar.style.width = (left / total * 100) + '%';
+  const warn = left <= 15;
+  el.classList.toggle('warn', warn);
+  bar.classList.toggle('warn', warn);
+}
+
+function submitWords() {
+  const raw = document.getElementById('words-answer').value.trim();
+  if (!raw) return;
+
+  const entered = raw.toLowerCase()
+    .split(/[\n,]+/)
+    .map(w => w.trim().replace(/[^а-яёa-z]/gi, ''))
+    .filter(Boolean);
+
+  const correct = WORDS.map(w => w.toLowerCase());
+  const count = entered.filter(w => correct.includes(w)).length;
+
+  const wordsScore = count >= 16 ? 'good' : count >= 11 ? 'normal' : 'bad';
+  sendResult(wordsScore);
+}
+
+// ===================== SEND =====================
+async function sendResult(wordsScore) {
+  show('s-loading');
+  try {
+    const res = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: userId,
+        schulte_score: schulteScore,
+        words_score: wordsScore
+      })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    show('s-done');
+  } catch (e) {
+    showError('Не удалось отправить результат. Вернитесь в бот и попробуйте ещё раз.');
+  }
+}
+
+async function triggerResult() {
+  const btn = document.getElementById('get-result-btn');
+  btn.disabled = true;
+  btn.textContent = 'Загрузка...';
+  try {
+    await fetch('https://work.radionolkov.ru/webhook/mozg-result', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId })
+    });
+  } catch (e) {
+    // fire and forget — even if fetch fails, close the app
+  }
+  window.Telegram?.WebApp?.close();
+}
+
+// ===================== UTILS =====================
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+</script>
+</body>
+</html>
