@@ -397,7 +397,7 @@
 
 <script>
 // ===================== CONFIG =====================
-const WEBHOOK_URL = 'https://work.radionolkov.ru/webhook/mozg-test2';
+const WEBHOOK_URL = 'https://n8n.alenapromozg.ru/webhook/mozg-test2';
 
 const WORDS = [
   'Столб','Ручка','Цветок','Ваза',
@@ -581,7 +581,7 @@ async function triggerResult() {
   btn.disabled = true;
   btn.textContent = 'Загрузка...';
   try {
-    await fetch('https://work.radionolkov.ru/webhook/mozg-result', {
+    await fetch('https://n8n.alenapromozg.ru/webhook/mozg-result', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_id: userId })
