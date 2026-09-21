@@ -4,8 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Мозг — Тест 2</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Скрипт Telegram — копия с нашего адреса: у части провайдеров в России telegram.org не открывается (см. README). -->
+  <script src="/telegram-web-app.js"></script>
+  <!-- Шрифт не задерживает страницу: пока он грузится (или если Google недоступен), текст — системным шрифтом. -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <style>
     :root {
       --blue: #2563EB;
@@ -397,7 +399,9 @@
 
 <script>
 // ===================== CONFIG =====================
-const WEBHOOK_URL = 'https://n8n.alenapromozg.ru/webhook/mozg-test2';
+// Вебхуки n8n — через свой адрес (nginx.conf пересылает их в n8n): браузер человека ходит только на app.alenapromozg.ru.
+const WEBHOOK_URL = '/webhook/mozg-test2';
+const RESULT_URL = '/webhook/mozg-result';
 
 const WORDS = [
   'Столб','Ручка','Цветок','Ваза',
@@ -581,7 +585,7 @@ async function triggerResult() {
   btn.disabled = true;
   btn.textContent = 'Загрузка...';
   try {
-    await fetch('https://n8n.alenapromozg.ru/webhook/mozg-result', {
+    await fetch(RESULT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_id: userId })
